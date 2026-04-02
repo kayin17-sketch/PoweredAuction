@@ -23,7 +23,7 @@ end
 function PoweredAuction_AddToWatchList(itemName)
     if not itemName or itemName == "" then return end
 
-    itemName = strtrim(itemName)
+    itemName = PoweredAuction_Trim(itemName)
 
     for _, name in ipairs(PoweredAuctionDB.watchList) do
         if string.lower(name) == string.lower(itemName) then

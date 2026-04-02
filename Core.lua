@@ -3,6 +3,11 @@ PoweredAuction.version = "1.0.0"
 
 local PRINT_PREFIX = "|cFF00FF00[PoweredAuction]|r "
 
+function PoweredAuction_Trim(s)
+    if not s then return "" end
+    return string.gsub(s, "^%s*(.-)%s*$", "%1")
+end
+
 function PoweredAuction_Print(msg)
     DEFAULT_CHAT_FRAME:AddMessage(PRINT_PREFIX .. tostring(msg))
 end
@@ -25,14 +30,14 @@ function PoweredAuction_SlashCommand(msg)
     elseif msg == "scan" then
         PoweredAuction_StartScan()
     elseif string.sub(msg, 1, 3) == "add" then
-        local itemName = strtrim(string.sub(msg, 5))
+        local itemName = PoweredAuction_Trim(string.sub(msg, 5))
         if itemName and itemName ~= "" then
             PoweredAuction_AddToWatchList(itemName)
         else
             PoweredAuction_PrintError("Usage: /pa add <item name>")
         end
     elseif string.sub(msg, 1, 6) == "remove" then
-        local itemName = strtrim(string.sub(msg, 8))
+        local itemName = PoweredAuction_Trim(string.sub(msg, 8))
         if itemName and itemName ~= "" then
             PoweredAuction_RemoveFromWatchList(itemName)
         else
