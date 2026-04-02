@@ -1,4 +1,4 @@
-## Interface: 11211
+## Interface: 11200
 ## Title: PoweredAuction
 ## Notes: Auction House market scanner and analyzer
 ## Author: kayin
