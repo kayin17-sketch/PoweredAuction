@@ -1,5 +1,6 @@
 local PA_SCAN_DELAY = 1.0
 local PA_QUERY_POLL_DELAY = 0.5
+local PA_QUERY_MAX_RETRIES = 10
 
 local ahIsOpen = false
 
@@ -9,6 +10,7 @@ local scanState = {
     currentItemName = nil,
     currentPage = 0,
     totalScannedItems = 0,
+    queryRetries = 0,
 }
 
 local scanTimerFrame = CreateFrame("Frame", "PoweredAuctionScanTimerFrame")
@@ -96,6 +98,7 @@ function PoweredAuction_ScanNextItem()
 
     scanState.currentItemName = PoweredAuctionDB.watchList[scanState.currentIndex]
     scanState.currentPage = 0
+    scanState.queryRetries = 0
 
     PoweredAuction_SetStatusText("Scanning: " .. scanState.currentItemName ..
         " (" .. scanState.currentIndex .. "/" .. table.getn(PoweredAuctionDB.watchList) .. ")")
@@ -112,15 +115,29 @@ function PoweredAuction_QueryAuctionPage(itemName, page)
     end
 
     scanState.currentPage = page
+    scanState.queryRetries = 0
 
-    local canQuery = CanSendAuctionQuery()
+    PoweredAuction_WaitAndQuery(itemName, page)
+end
+
+function PoweredAuction_WaitAndQuery(itemName, page)
+    if not scanState.isScanning then return end
+
+    local canQuery, canQueryAll = CanSendAuctionQuery()
     if not canQuery then
+        scanState.queryRetries = scanState.queryRetries + 1
+        if scanState.queryRetries > PA_QUERY_MAX_RETRIES then
+            PoweredAuction_PrintError("Could not query AH for \"" .. itemName .. "\". Skipping.")
+            PoweredAuction_AdvanceItem()
+            return
+        end
         ScheduleCallback(function()
-            PoweredAuction_QueryAuctionPage(itemName, page)
+            PoweredAuction_WaitAndQuery(itemName, page)
         end, 0.5)
         return
     end
 
+    scanState.queryRetries = 0
     QueryAuctionItems(itemName, nil, nil, nil, nil, nil, page, nil, nil)
 
     ScheduleCallback(function()
@@ -139,20 +156,19 @@ function PoweredAuction_ProcessScanResults()
     end
 
     local totalPages = math.ceil(totalAuctions / 50)
+    if totalPages == 0 then totalPages = 1 end
 
     for i = 1, numBatchAuctions do
         local name, texture, count, quality, canUse, level, minBid, minIncrement, buyoutPrice,
-            bidAmount, highBidder, owner = GetAuctionItemInfo("list", i)
+            bidAmount, highBidder, owner, saleStatus = GetAuctionItemInfo("list", i)
 
         if name and buyoutPrice and buyoutPrice > 0 and count and count > 0 then
             local buyoutPerUnit = math.floor(buyoutPrice / count)
 
             local itemID = 0
-            if GetItemInfo then
-                local itemIdFromCache = select(3, GetItemInfo(name))
-                if itemIdFromCache then
-                    itemID = itemIdFromCache
-                end
+            local cachedName, _, _, _, _, _, _, _, _, _, cachedItemID = GetItemInfo(name)
+            if cachedItemID then
+                itemID = cachedItemID
             end
 
             PoweredAuction_AddScanResult(name, buyoutPerUnit, count, itemID)

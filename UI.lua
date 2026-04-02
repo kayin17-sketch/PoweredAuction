@@ -129,12 +129,14 @@ function PoweredAuction_UpdateItemList()
 
         if dataIndex <= numItems then
             local itemName = watchList[dataIndex]
-            text:SetText(itemName)
+            text:SetText(itemName or "Unknown")
 
             local historyCount = 0
-            local key = string.lower(itemName)
-            if PoweredAuctionDB.scanHistory[key] then
-                historyCount = table.getn(PoweredAuctionDB.scanHistory[key].scans)
+            if itemName then
+                local key = string.lower(itemName)
+                if PoweredAuctionDB.scanHistory and PoweredAuctionDB.scanHistory[key] then
+                    historyCount = table.getn(PoweredAuctionDB.scanHistory[key].scans or {})
+                end
             end
             scanCount:SetText(historyCount > 0 and (historyCount .. " scans") or "")
 
@@ -148,6 +150,7 @@ function PoweredAuction_UpdateItemList()
 
             button:Show()
         else
+            button.dataIndex = nil
             button:Hide()
         end
     end

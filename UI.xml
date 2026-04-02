@@ -120,7 +120,7 @@
                     </OnVerticalScroll>
                 </Scripts>
                 <ScrollChild>
-                    <Frame name="$parentItemList">
+                    <Frame name="$parentItemList" enableMouse="true">
                         <Size>
                             <AbsDimension x="340" y="300"/>
                         </Size>
