@@ -1,0 +1,12 @@
+## Interface: 11211
+## Title: PoweredAuction
+## Notes: Auction House market scanner and analyzer
+## Author: kayin
+## Version: 1.0.0
+## SavedVariables: PoweredAuctionDB
+
+Core.lua
+Database.lua
+UI.xml
+UI.lua
+Scanner.lua
