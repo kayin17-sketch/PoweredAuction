@@ -1,5 +1,5 @@
 local PA_SCAN_DELAY = 1.0
-local PA_QUERY_POLL_DELAY = 0.4
+local PA_QUERY_POLL_DELAY = 0.5
 
 local scanState = {
     isScanning = false,
@@ -7,7 +7,6 @@ local scanState = {
     currentItemName = nil,
     currentPage = 0,
     totalScannedItems = 0,
-    waitingForResults = false,
 }
 
 local scanTimerFrame = CreateFrame("Frame", "PoweredAuctionScanTimerFrame")
@@ -46,7 +45,7 @@ function PoweredAuction_StartScan()
     end
 
     if scanState.isScanning then
-        PoweredAuction_CancelScan()
+        PoweredAuction_CancelScan("Scan cancelled by user.")
         return
     end
 
@@ -97,7 +96,6 @@ function PoweredAuction_QueryAuctionPage(itemName, page)
     end
 
     scanState.currentPage = page
-    scanState.waitingForResults = true
 
     local canQuery = CanSendAuctionQuery()
     if not canQuery then
@@ -117,8 +115,6 @@ end
 function PoweredAuction_ProcessScanResults()
     if not scanState.isScanning then return end
 
-    scanState.waitingForResults = false
-
     local numBatchAuctions, totalAuctions = GetNumAuctionItems("list")
 
     if numBatchAuctions == 0 then
@@ -133,19 +129,17 @@ function PoweredAuction_ProcessScanResults()
             bidAmount, highBidder, owner = GetAuctionItemInfo("list", i)
 
         if name and buyoutPrice and buyoutPrice > 0 and count and count > 0 then
-            local itemID = 0
+            local buyoutPerUnit = math.floor(buyoutPrice / count)
 
-            local itemLink = GetAuctionItemLink and GetAuctionItemLink("list", i)
-            if itemLink then
-                local _, _, id = string.find(itemLink, "item:(%d+)")
-                if id then
-                    itemID = tonumber(id)
+            local itemID = 0
+            if GetItemInfo then
+                local itemIdFromCache = select(3, GetItemInfo(name))
+                if itemIdFromCache then
+                    itemID = itemIdFromCache
                 end
             end
 
-            local buyoutPerUnit = math.floor(buyoutPrice / count)
-
-            PoweredAuction_AddScanResult(itemID, name, buyoutPerUnit, count)
+            PoweredAuction_AddScanResult(name, buyoutPerUnit, count, itemID)
             scanState.totalScannedItems = scanState.totalScannedItems + 1
         end
     end
@@ -179,7 +173,6 @@ end
 
 function PoweredAuction_CancelScan(reason)
     scanState.isScanning = false
-    scanState.waitingForResults = false
 
     PoweredAuction_PrintError(reason or "Scan cancelled.")
     PoweredAuction_SetStatusText("Scan cancelled.")

@@ -16,8 +16,7 @@ StaticPopupDialogs["POWEREDAUCTION_CLEAR"] = {
 
 local function GetMinimapAngle()
     if not PoweredAuctionDB then return 225 end
-    if not PoweredAuctionDB.minimapAngle then PoweredAuctionDB.minimapAngle = 225 end
-    return PoweredAuctionDB.minimapAngle
+    return PoweredAuctionDB.minimapAngle or 225
 end
 
 local function SetMinimapAngle(angle)
@@ -31,11 +30,6 @@ local function UpdateMinimapPosition()
     local angle = math.rad(GetMinimapAngle())
     local x = math.cos(angle) * PA_MINIMAP_RADIUS
     local y = math.sin(angle) * PA_MINIMAP_RADIUS
-
-    local cx, cy = Minimap:GetCenter()
-    local px, py = UIParent:GetCenter()
-    cx = cx - px
-    cy = cy - py
 
     minimapButton:ClearAllPoints()
     minimapButton:SetPoint("CENTER", Minimap, "CENTER", x, y)
@@ -60,20 +54,18 @@ local function CreateContextMenu()
         insets = { left = 4, right = 4, top = 4, bottom = 4 },
     })
 
-    menu:SetPoint("CENTER", UIParent, "CENTER")
-
     local buttons = {}
 
-    local function AddMenuButton(text, callback)
+    local function AddMenuButton(buttonText, callback)
         local btn = CreateFrame("Button", nil, menu, "UIPanelButtonTemplate")
         btn:SetWidth(140)
         btn:SetHeight(24)
-        btn:SetText(text)
+        btn:SetText(buttonText)
 
-        if #buttons == 0 then
+        if table.getn(buttons) == 0 then
             btn:SetPoint("TOP", menu, "TOP", 0, -10)
         else
-            btn:SetPoint("TOP", buttons[#buttons], "BOTTOM", 0, -4)
+            btn:SetPoint("TOP", buttons[table.getn(buttons)], "BOTTOM", 0, -4)
         end
 
         btn:SetScript("OnClick", function()
@@ -104,11 +96,10 @@ local function CreateContextMenu()
         menu:Hide()
     end)
 
-    local totalHeight = 20 + (#buttons * 28)
+    local totalHeight = 20 + (table.getn(buttons) * 28)
     menu:SetHeight(totalHeight)
 
     contextMenu = menu
-
     return menu
 end
 
@@ -163,16 +154,11 @@ local function CreateMinimapButton()
     btn:SetScript("OnDragStop", function()
         this:UnlockHighlight()
         this.isDragging = false
-
         local mx, my = GetCursorPosition()
         local scale = Minimap:GetScale()
         mx = mx / scale
         my = my / scale
-
         local cx, cy = Minimap:GetCenter()
-        cx = cx * scale
-        cy = cy * scale
-
         local angle = math.deg(math.atan2(my - cy, mx - cx))
         if angle < 0 then angle = angle + 360 end
         SetMinimapAngle(angle)
@@ -185,7 +171,6 @@ local function CreateMinimapButton()
             local scale = Minimap:GetScale()
             mx = mx / scale
             my = my / scale
-
             local cx, cy = Minimap:GetCenter()
             local angle = math.deg(math.atan2(my - cy, mx - cx))
             if angle < 0 then angle = angle + 360 end
@@ -217,12 +202,3 @@ initFrame:SetScript("OnEvent", function()
     CreateMinimapButton()
     this:UnregisterEvent("VARIABLES_LOADED")
 end)
-
--- update SavedVariables declaration to include minimapAngle
-local origInitDB = PoweredAuction_InitDB
-PoweredAuction_InitDB = function()
-    origInitDB()
-    if not PoweredAuctionDB.minimapAngle then
-        PoweredAuctionDB.minimapAngle = 225
-    end
-end

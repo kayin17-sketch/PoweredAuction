@@ -3,6 +3,7 @@ function PoweredAuction_InitDB()
         PoweredAuctionDB = {
             watchList = {},
             scanHistory = {},
+            minimapAngle = 225,
         }
     end
 
@@ -12,6 +13,10 @@ function PoweredAuction_InitDB()
 
     if not PoweredAuctionDB.scanHistory then
         PoweredAuctionDB.scanHistory = {}
+    end
+
+    if not PoweredAuctionDB.minimapAngle then
+        PoweredAuctionDB.minimapAngle = 225
     end
 end
 
@@ -34,8 +39,6 @@ end
 
 function PoweredAuction_RemoveFromWatchList(itemName)
     if not itemName or itemName == "" then return end
-
-    itemName = strtrim(itemName)
 
     for i, name in ipairs(PoweredAuctionDB.watchList) do
         if string.lower(name) == string.lower(itemName) then
@@ -70,39 +73,41 @@ function PoweredAuction_ListWatchList()
     end
 end
 
-function PoweredAuction_AddScanResult(itemID, itemName, buyout, quantity)
-    if not itemID or not buyout or not quantity then return end
+function PoweredAuction_AddScanResult(itemName, buyout, quantity, itemID)
+    if not itemName or not buyout or not quantity then return end
 
-    if not PoweredAuctionDB.scanHistory[itemID] then
-        PoweredAuctionDB.scanHistory[itemID] = {
+    local key = string.lower(itemName)
+
+    if not PoweredAuctionDB.scanHistory[key] then
+        PoweredAuctionDB.scanHistory[key] = {
             name = itemName,
+            itemId = itemID or 0,
             scans = {},
         }
     end
 
+    local history = PoweredAuctionDB.scanHistory[key]
+    history.name = itemName
+    if itemID and itemID > 0 then
+        history.itemId = itemID
+    end
+
     local timestamp = time()
 
-    for _, scan in ipairs(PoweredAuctionDB.scanHistory[itemID].scans) do
+    for _, scan in ipairs(history.scans) do
         if scan.timestamp == timestamp and scan.buyout == buyout then
             return
         end
     end
 
-    table.insert(PoweredAuctionDB.scanHistory[itemID].scans, {
+    table.insert(history.scans, {
         timestamp = timestamp,
         buyout = buyout,
         quantity = quantity,
     })
-
-    PoweredAuctionDB.scanHistory[itemID].name = itemName
 end
 
 function PoweredAuction_ClearHistory()
     PoweredAuctionDB.scanHistory = {}
     PoweredAuction_Print("Scan history cleared.")
-end
-
-function PoweredAuction_GetScanCount(itemID)
-    if not PoweredAuctionDB.scanHistory[itemID] then return 0 end
-    return table.getn(PoweredAuctionDB.scanHistory[itemID].scans)
 end

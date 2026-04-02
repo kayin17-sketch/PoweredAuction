@@ -113,14 +113,13 @@ function PoweredAuction_UpdateItemList()
         local dataIndex = offset + i
 
         if dataIndex <= numItems then
-            text:SetText(watchList[dataIndex])
+            local itemName = watchList[dataIndex]
+            text:SetText(itemName)
 
             local historyCount = 0
-            for itemID, data in pairs(PoweredAuctionDB.scanHistory) do
-                if data.name and string.lower(data.name) == string.lower(watchList[dataIndex]) then
-                    historyCount = table.getn(data.scans)
-                    break
-                end
+            local key = string.lower(itemName)
+            if PoweredAuctionDB.scanHistory[key] then
+                historyCount = table.getn(PoweredAuctionDB.scanHistory[key].scans)
             end
             scanCount:SetText(historyCount > 0 and (historyCount .. " scans") or "")
 
@@ -141,9 +140,9 @@ function PoweredAuction_UpdateItemList()
     FauxScrollFrame_Update(scrollFrame, numItems, PA_UI_MAX_VISIBLE, PA_UI_ITEM_HEIGHT)
 end
 
-function PoweredAuction_SetStatusText(text)
+function PoweredAuction_SetStatusText(statusText)
     local label = getglobal("PoweredAuctionFrameStatusLabel")
     if label then
-        label:SetText(text)
+        label:SetText(statusText)
     end
 end
