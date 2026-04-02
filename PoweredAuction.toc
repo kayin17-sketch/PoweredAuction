@@ -7,6 +7,5 @@
 
 Core.lua
 Database.lua
-UI.xml
-UI.lua
 Scanner.lua
+UI.xml

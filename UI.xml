@@ -2,8 +2,6 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.blizzard.com/wow/ui/">
 
-    <Script file="UI.lua"/>
-
     <Frame name="PoweredAuctionFrame" toplevel="true" frameStrata="DIALOG"
            movable="true" enableMouse="true" hidden="true" parent="UIParent">
         <Size>
@@ -52,7 +50,6 @@
         </Layers>
 
         <Frames>
-            <!-- Close button -->
             <Button name="$parentCloseButton" inherits="UIPanelCloseButton">
                 <Anchors>
                     <Anchor point="TOPRIGHT" relativeTo="$parent" relativePoint="TOPRIGHT">
@@ -63,7 +60,6 @@
                 </Anchors>
             </Button>
 
-            <!-- Input box for adding items -->
             <EditBox name="$parentItemInput" inherits="InputBoxTemplate" autoFocus="false"
                      letters="60">
                 <Size>
@@ -86,7 +82,6 @@
                 </Scripts>
             </EditBox>
 
-            <!-- Add button -->
             <Button name="$parentAddButton" inherits="UIPanelButtonTemplate" text="Add">
                 <Size>
                     <AbsDimension x="90" y="24"/>
@@ -105,7 +100,6 @@
                 </Scripts>
             </Button>
 
-            <!-- Scroll frame for item list -->
             <ScrollFrame name="$parentItemListScrollFrame" inherits="UIPanelScrollFrameTemplate">
                 <Size>
                     <AbsDimension x="340" y="300"/>
@@ -117,6 +111,11 @@
                         </Offset>
                     </Anchor>
                 </Anchors>
+                <Scripts>
+                    <OnVerticalScroll>
+                        FauxScrollFrame_OnVerticalScroll(arg1, 20, PoweredAuction_UpdateItemList)
+                    </OnVerticalScroll>
+                </Scripts>
                 <ScrollChild>
                     <Frame name="$parentItemList">
                         <Size>
@@ -126,7 +125,6 @@
                 </ScrollChild>
             </ScrollFrame>
 
-            <!-- Scan button -->
             <Button name="$parentScanButton" inherits="UIPanelButtonTemplate" text="Scan AH">
                 <Size>
                     <AbsDimension x="120" y="28"/>
@@ -140,12 +138,12 @@
                 </Anchors>
                 <Scripts>
                     <OnClick>
+                        if not PoweredAuction_StartScan then return end
                         PoweredAuction_StartScan()
                     </OnClick>
                 </Scripts>
             </Button>
 
-            <!-- Remove selected button -->
             <Button name="$parentRemoveButton" inherits="UIPanelButtonTemplate" text="Remove">
                 <Size>
                     <AbsDimension x="90" y="28"/>
@@ -177,11 +175,26 @@
             </OnDragStop>
             <OnShow>
                 PlaySound("igMainMenuOpen")
+                PoweredAuction_RefreshItemList()
             </OnShow>
             <OnHide>
                 PlaySound("igMainMenuClose")
             </OnHide>
         </Scripts>
     </Frame>
+
+    <Frame name="PoweredAuctionEventFrame" hidden="true">
+        <Scripts>
+            <OnLoad>
+                this:RegisterEvent("VARIABLES_LOADED")
+            </OnLoad>
+            <OnEvent>
+                PoweredAuction_OnEvent(event)
+            </OnEvent>
+        </Scripts>
+    </Frame>
+
+    <Script file="UI.lua"/>
+    <Script file="Minimap.lua"/>
 
 </Ui>

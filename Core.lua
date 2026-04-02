@@ -1,28 +1,20 @@
 PoweredAuction = {}
 PoweredAuction.version = "1.0.0"
 
-local ADDON_NAME = "PoweredAuction"
 local PRINT_PREFIX = "|cFF00FF00[PoweredAuction]|r "
 
 function PoweredAuction_Print(msg)
-    DEFAULT_CHAT_FRAME:AddMessage(PRINT_PREFIX .. msg)
+    DEFAULT_CHAT_FRAME:AddMessage(PRINT_PREFIX .. tostring(msg))
 end
 
 function PoweredAuction_PrintError(msg)
-    DEFAULT_CHAT_FRAME:AddMessage(PRINT_PREFIX .. "|cFFFF0000" .. msg .. "|r")
+    DEFAULT_CHAT_FRAME:AddMessage(PRINT_PREFIX .. "|cFFFF0000" .. tostring(msg) .. "|r")
 end
 
-function PoweredAuction_OnLoad()
-    SLASH_POWEREDAUCTION1 = "/pa"
-    SLASH_POWEREDAUCTION2 = "/poweredauction"
-    SlashCmdList["POWEREDAUCTION"] = function(msg)
-        PoweredAuction_SlashCommand(msg)
-    end
-
-    this:RegisterEvent("VARIABLES_LOADED")
-    this:RegisterEvent("ADDON_LOADED")
-
-    PoweredAuction_Print("Loaded v" .. PoweredAuction.version .. ". Type /pa for help.")
+SLASH_POWEREDAUCTION1 = "/pa"
+SLASH_POWEREDAUCTION2 = "/poweredauction"
+SlashCmdList["POWEREDAUCTION"] = function(msg)
+    PoweredAuction_SlashCommand(msg)
 end
 
 function PoweredAuction_SlashCommand(msg)
@@ -33,14 +25,14 @@ function PoweredAuction_SlashCommand(msg)
     elseif msg == "scan" then
         PoweredAuction_StartScan()
     elseif string.sub(msg, 1, 3) == "add" then
-        local itemName = string.sub(msg, 5)
+        local itemName = strtrim(string.sub(msg, 5))
         if itemName and itemName ~= "" then
             PoweredAuction_AddToWatchList(itemName)
         else
             PoweredAuction_PrintError("Usage: /pa add <item name>")
         end
     elseif string.sub(msg, 1, 6) == "remove" then
-        local itemName = string.sub(msg, 8)
+        local itemName = strtrim(string.sub(msg, 8))
         if itemName and itemName ~= "" then
             PoweredAuction_RemoveFromWatchList(itemName)
         else
@@ -69,11 +61,4 @@ function PoweredAuction_PrintHelp()
     PoweredAuction_Print("/pa scan - Start auction scan (AH must be open)")
     PoweredAuction_Print("/pa clear - Clear all scan history")
     PoweredAuction_Print("/pa help - Show this help")
-end
-
-function PoweredAuction_OnEvent(event)
-    if event == "VARIABLES_LOADED" then
-        PoweredAuction_InitDB()
-        PoweredAuction_InitUI()
-    end
 end

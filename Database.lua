@@ -50,7 +50,7 @@ function PoweredAuction_RemoveFromWatchList(itemName)
 end
 
 function PoweredAuction_RemoveFromWatchListByIndex(index)
-    if index < 1 or index > table.getn(PoweredAuctionDB.watchList) then return end
+    if not index or index < 1 or index > table.getn(PoweredAuctionDB.watchList) then return end
 
     local name = PoweredAuctionDB.watchList[index]
     table.remove(PoweredAuctionDB.watchList, index)
