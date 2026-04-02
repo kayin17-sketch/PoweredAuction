@@ -8,6 +8,13 @@ function PoweredAuction_Trim(s)
     return string.gsub(s, "^%s*(.-)%s*$", "%1")
 end
 
+function PoweredAuction_ExtractItemName(link)
+    if not link then return nil end
+    local _, _, name = string.find(link, "%[(.-)%]")
+    if name then return name end
+    return nil
+end
+
 function PoweredAuction_Print(msg)
     DEFAULT_CHAT_FRAME:AddMessage(PRINT_PREFIX .. tostring(msg))
 end

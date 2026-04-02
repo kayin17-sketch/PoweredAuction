@@ -8,4 +8,5 @@
 Core.lua
 Database.lua
 Scanner.lua
+Shortcut.lua
 UI.xml

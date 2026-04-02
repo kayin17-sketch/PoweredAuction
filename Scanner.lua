@@ -1,6 +1,8 @@
 local PA_SCAN_DELAY = 1.0
 local PA_QUERY_POLL_DELAY = 0.5
 
+local ahIsOpen = false
+
 local scanState = {
     isScanning = false,
     currentIndex = 0,
@@ -35,7 +37,21 @@ local function ScheduleCallback(callback, delay)
 end
 
 local function IsAuctionHouseOpen()
-    return AuctionFrame and AuctionFrame:IsVisible()
+    if ahIsOpen then return true end
+    if AuctionFrame and AuctionFrame:IsVisible() then return true end
+    if CanSendAuctionQuery() then
+        ahIsOpen = true
+        return true
+    end
+    return false
+end
+
+function PoweredAuction_AHOpened()
+    ahIsOpen = true
+end
+
+function PoweredAuction_AHClosed()
+    ahIsOpen = false
 end
 
 function PoweredAuction_StartScan()

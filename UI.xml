@@ -79,6 +79,9 @@
                     <OnEscapePressed>
                         this:ClearFocus()
                     </OnEscapePressed>
+                    <OnReceiveDrag>
+                        PoweredAuction_OnReceiveDrag()
+                    </OnReceiveDrag>
                 </Scripts>
             </EditBox>
 
@@ -187,6 +190,8 @@
         <Scripts>
             <OnLoad>
                 this:RegisterEvent("VARIABLES_LOADED")
+                this:RegisterEvent("AUCTION_HOUSE_SHOW")
+                this:RegisterEvent("AUCTION_HOUSE_CLOSED")
             </OnLoad>
             <OnEvent>
                 PoweredAuction_OnEvent(event)

@@ -8,6 +8,10 @@ function PoweredAuction_OnEvent(event)
         PoweredAuction_InitDB()
         PoweredAuction_CreateItemButtons()
         PoweredAuction_Print("Loaded v" .. PoweredAuction.version .. ". Type /pa for help.")
+    elseif event == "AUCTION_HOUSE_SHOW" then
+        PoweredAuction_AHOpened()
+    elseif event == "AUCTION_HOUSE_CLOSED" then
+        PoweredAuction_AHClosed()
     end
 end
 
@@ -28,9 +32,20 @@ function PoweredAuction_UIAddItem()
     local text = input:GetText()
 
     if text and text ~= "" then
+        local extractedName = PoweredAuction_ExtractItemName(text)
+        if extractedName then
+            text = extractedName
+        end
         PoweredAuction_AddToWatchList(text)
         input:SetText("")
         input:SetFocus()
+    end
+end
+
+function PoweredAuction_OnReceiveDrag()
+    local name = PoweredAuction_GetLastDraggedItem()
+    if name then
+        getglobal("PoweredAuctionFrameItemInput"):SetText(name)
     end
 end
 
