@@ -5,46 +5,150 @@
     <Frame name="PoweredAuctionFrame" toplevel="true" frameStrata="DIALOG"
            movable="true" enableMouse="true" hidden="true" parent="UIParent">
         <Size>
-            <AbsDimension x="400" y="500"/>
+            <AbsDimension x="520" y="520"/>
         </Size>
         <Anchors>
             <Anchor point="CENTER"/>
         </Anchors>
 
-        <Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background"
-                  edgeFile="Interface\DialogFrame\UI-DialogBox-Border"
+        <Backdrop bgFile="Interface\Buttons\WHITE8X8"
+                  edgeFile="Interface\Buttons\WHITE8X8"
                   tile="true">
             <BackgroundInsets>
-                <AbsInset left="11" right="12" top="12" bottom="11"/>
+                <AbsInset left="1" right="1" top="1" bottom="1"/>
             </BackgroundInsets>
             <TileSize>
                 <AbsValue val="32"/>
             </TileSize>
             <EdgeSize>
-                <AbsValue val="32"/>
+                <AbsValue val="1"/>
             </EdgeSize>
+            <Color r="0.07" g="0.07" b="0.07" a="0.93"/>
+            <BorderColor r="0.12" g="0.12" b="0.12" a="1"/>
         </Backdrop>
 
         <Layers>
             <Layer level="ARTWORK">
-                <FontString name="$parentTitle" inherits="GameFontNormalLarge" text="PoweredAuction">
+                <Texture name="$parentHeaderBg">
+                    <Size>
+                        <AbsDimension x="518" y="30"/>
+                    </Size>
                     <Anchors>
-                        <Anchor point="TOP" relativeTo="$parent" relativePoint="TOP">
+                        <Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
                             <Offset>
-                                <AbsDimension x="0" y="-15"/>
+                                <AbsDimension x="1" y="-1"/>
                             </Offset>
                         </Anchor>
                     </Anchors>
+                    <Color r="0.16" g="0.18" b="0.22" a="0.9"/>
+                </Texture>
+
+                <FontString name="$parentTitle" inherits="GameFontNormal" text="PoweredAuction">
+                    <Anchors>
+                        <Anchor point="LEFT" relativeTo="$parentHeaderBg" relativePoint="LEFT">
+                            <Offset>
+                                <AbsDimension x="10" y="0"/>
+                            </Offset>
+                        </Anchor>
+                    </Anchors>
+                    <Color r="0.84" g="0.88" b="0.83" a="1"/>
                 </FontString>
 
-                <FontString name="$parentStatusLabel" inherits="GameFontNormal" text="Ready">
+                <Texture name="$parentToolbarBg">
+                    <Size>
+                        <AbsDimension x="518" y="36"/>
+                    </Size>
+                    <Anchors>
+                        <Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
+                            <Offset>
+                                <AbsDimension x="1" y="-31"/>
+                            </Offset>
+                        </Anchor>
+                    </Anchors>
+                    <Color r="0.12" g="0.12" b="0.12" a="1"/>
+                </Texture>
+
+                <Texture name="$parentListHeaderBg">
+                    <Size>
+                        <AbsDimension x="490" y="20"/>
+                    </Size>
+                    <Anchors>
+                        <Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
+                            <Offset>
+                                <AbsDimension x="10" y="-72"/>
+                            </Offset>
+                        </Anchor>
+                    </Anchors>
+                    <Color r="0.11" g="0.11" b="0.11" a="1"/>
+                </Texture>
+
+                <FontString name="$parentColName" inherits="GameFontNormalSmall" text="Item">
+                    <Anchors>
+                        <Anchor point="LEFT" relativeTo="$parentListHeaderBg" relativePoint="LEFT">
+                            <Offset>
+                                <AbsDimension x="5" y="0"/>
+                            </Offset>
+                        </Anchor>
+                    </Anchors>
+                    <Color r="0.6" g="0.6" b="0.6" a="1"/>
+                </FontString>
+
+                <FontString name="$parentColPrice" inherits="GameFontNormalSmall" text="Price">
+                    <Anchors>
+                        <Anchor point="LEFT" relativeTo="$parentListHeaderBg" relativePoint="LEFT">
+                            <Offset>
+                                <AbsDimension x="280" y="0"/>
+                            </Offset>
+                        </Anchor>
+                    </Anchors>
+                    <Color r="0.6" g="0.6" b="0.6" a="1"/>
+                </FontString>
+
+                <FontString name="$parentColQty" inherits="GameFontNormalSmall" text="Qty">
+                    <Anchors>
+                        <Anchor point="LEFT" relativeTo="$parentListHeaderBg" relativePoint="LEFT">
+                            <Offset>
+                                <AbsDimension x="370" y="0"/>
+                            </Offset>
+                        </Anchor>
+                    </Anchors>
+                    <Color r="0.6" g="0.6" b="0.6" a="1"/>
+                </FontString>
+
+                <FontString name="$parentColScans" inherits="GameFontNormalSmall" text="Scans">
+                    <Anchors>
+                        <Anchor point="RIGHT" relativeTo="$parentListHeaderBg" relativePoint="RIGHT">
+                            <Offset>
+                                <AbsDimension x="-5" y="0"/>
+                            </Offset>
+                        </Anchor>
+                    </Anchors>
+                    <Color r="0.6" g="0.6" b="0.6" a="1"/>
+                </FontString>
+
+                <Texture name="$parentStatusBarBg">
+                    <Size>
+                        <AbsDimension x="518" y="24"/>
+                    </Size>
                     <Anchors>
                         <Anchor point="BOTTOMLEFT" relativeTo="$parent" relativePoint="BOTTOMLEFT">
                             <Offset>
-                                <AbsDimension x="20" y="15"/>
+                                <AbsDimension x="1" y="1"/>
                             </Offset>
                         </Anchor>
                     </Anchors>
+                    <Color r="0.16" g="0.18" b="0.22" a="0.9"/>
+                </Texture>
+
+                <FontString name="$parentStatusLabel" inherits="GameFontNormalSmall" text="Ready">
+                    <Anchors>
+                        <Anchor point="LEFT" relativeTo="$parentStatusBarBg" relativePoint="LEFT">
+                            <Offset>
+                                <AbsDimension x="10" y="0"/>
+                            </Offset>
+                        </Anchor>
+                    </Anchors>
+                    <Color r="0.84" g="0.88" b="0.83" a="1"/>
                 </FontString>
             </Layer>
         </Layers>
@@ -54,24 +158,36 @@
                 <Anchors>
                     <Anchor point="TOPRIGHT" relativeTo="$parent" relativePoint="TOPRIGHT">
                         <Offset>
-                            <AbsDimension x="-2" y="-2"/>
+                            <AbsDimension x="2" y="2"/>
                         </Offset>
                     </Anchor>
                 </Anchors>
             </Button>
 
-            <EditBox name="$parentItemInput" inherits="InputBoxTemplate" autoFocus="false"
-                     letters="60">
+            <EditBox name="$parentItemInput" autoFocus="false" letters="60">
                 <Size>
-                    <AbsDimension x="260" y="32"/>
+                    <AbsDimension x="300" y="24"/>
                 </Size>
                 <Anchors>
-                    <Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
+                    <Anchor point="TOPLEFT" relativeTo="$parentToolbarBg" relativePoint="TOPLEFT">
                         <Offset>
-                            <AbsDimension x="20" y="-40"/>
+                            <AbsDimension x="10" y="-6"/>
                         </Offset>
                     </Anchor>
                 </Anchors>
+                <Backdrop bgFile="Interface\Buttons\WHITE8X8"
+                          edgeFile="Interface\Buttons\WHITE8X8"
+                          tile="true">
+                    <BackgroundInsets>
+                        <AbsInset left="1" right="1" top="1" bottom="1"/>
+                    </BackgroundInsets>
+                    <EdgeSize>
+                        <AbsValue val="1"/>
+                    </EdgeSize>
+                    <Color r="0.16" g="0.16" b="0.16" a="1"/>
+                    <BorderColor r="0.25" g="0.25" b="0.25" a="1"/>
+                </Backdrop>
+                <FontString inherits="GameFontHighlight" justifyH="LEFT"/>
                 <Scripts>
                     <OnEnterPressed>
                         PoweredAuction_UIAddItem()
@@ -85,85 +201,145 @@
                 </Scripts>
             </EditBox>
 
-            <Button name="$parentAddButton" inherits="UIPanelButtonTemplate" text="Add">
+            <Button name="$parentAddButton" text="Add">
                 <Size>
-                    <AbsDimension x="90" y="24"/>
+                    <AbsDimension x="70" y="22"/>
                 </Size>
                 <Anchors>
                     <Anchor point="LEFT" relativeTo="$parentItemInput" relativePoint="RIGHT">
                         <Offset>
-                            <AbsDimension x="5" y="0"/>
+                            <AbsDimension x="6" y="0"/>
                         </Offset>
                     </Anchor>
                 </Anchors>
+                <Backdrop bgFile="Interface\Buttons\WHITE8X8"
+                          edgeFile="Interface\Buttons\WHITE8X8"
+                          tile="true">
+                    <BackgroundInsets>
+                        <AbsInset left="1" right="1" top="1" bottom="1"/>
+                    </BackgroundInsets>
+                    <EdgeSize>
+                        <AbsValue val="1"/>
+                    </EdgeSize>
+                    <Color r="0.19" g="0.22" b="0.33" a="0.9"/>
+                    <BorderColor r="0.3" g="0.3" b="0.4" a="1"/>
+                </Backdrop>
+                <NormalFont style="GameFontNormal"/>
+                <HighlightFont style="GameFontHighlight"/>
                 <Scripts>
                     <OnClick>
                         PoweredAuction_UIAddItem()
                     </OnClick>
+                    <OnEnter>
+                        this:SetBackdropColor(0.25, 0.28, 0.4, 0.95)
+                    </OnEnter>
+                    <OnLeave>
+                        this:SetBackdropColor(0.19, 0.22, 0.33, 0.9)
+                    </OnLeave>
                 </Scripts>
             </Button>
 
-            <ScrollFrame name="$parentItemListScrollFrame" inherits="UIPanelScrollFrameTemplate">
+            <Button name="$parentScanButton" text="Scan">
                 <Size>
-                    <AbsDimension x="340" y="300"/>
+                    <AbsDimension x="70" y="22"/>
                 </Size>
                 <Anchors>
-                    <Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
+                    <Anchor point="LEFT" relativeTo="$parentAddButton" relativePoint="RIGHT">
                         <Offset>
-                            <AbsDimension x="16" y="-80"/>
+                            <AbsDimension x="6" y="0"/>
                         </Offset>
                     </Anchor>
                 </Anchors>
-                <Scripts>
-                    <OnVerticalScroll>
-                        FauxScrollFrame_OnVerticalScroll(arg1, 20, PoweredAuction_UpdateItemList)
-                    </OnVerticalScroll>
-                </Scripts>
-                <ScrollChild>
-                    <Frame name="$parentItemList" enableMouse="true">
-                        <Size>
-                            <AbsDimension x="340" y="300"/>
-                        </Size>
-                    </Frame>
-                </ScrollChild>
-            </ScrollFrame>
-
-            <Button name="$parentScanButton" inherits="UIPanelButtonTemplate" text="Scan AH">
-                <Size>
-                    <AbsDimension x="120" y="28"/>
-                </Size>
-                <Anchors>
-                    <Anchor point="BOTTOMRIGHT" relativeTo="$parent" relativePoint="BOTTOMRIGHT">
-                        <Offset>
-                            <AbsDimension x="-20" y="15"/>
-                        </Offset>
-                    </Anchor>
-                </Anchors>
+                <Backdrop bgFile="Interface\Buttons\WHITE8X8"
+                          edgeFile="Interface\Buttons\WHITE8X8"
+                          tile="true">
+                    <BackgroundInsets>
+                        <AbsInset left="1" right="1" top="1" bottom="1"/>
+                    </BackgroundInsets>
+                    <EdgeSize>
+                        <AbsValue val="1"/>
+                    </EdgeSize>
+                    <Color r="0.15" g="0.35" b="0.15" a="0.9"/>
+                    <BorderColor r="0.2" g="0.45" b="0.2" a="1"/>
+                </Backdrop>
+                <NormalFont style="GameFontNormal"/>
+                <HighlightFont style="GameFontHighlight"/>
                 <Scripts>
                     <OnClick>
                         if not PoweredAuction_StartScan then return end
                         PoweredAuction_StartScan()
                     </OnClick>
+                    <OnEnter>
+                        this:SetBackdropColor(0.2, 0.45, 0.2, 0.95)
+                    </OnEnter>
+                    <OnLeave>
+                        this:SetBackdropColor(0.15, 0.35, 0.15, 0.9)
+                    </OnLeave>
                 </Scripts>
             </Button>
 
-            <Button name="$parentRemoveButton" inherits="UIPanelButtonTemplate" text="Remove">
+            <Button name="$parentRemoveButton" text="Remove">
                 <Size>
-                    <AbsDimension x="90" y="28"/>
+                    <AbsDimension x="70" y="22"/>
                 </Size>
                 <Anchors>
-                    <Anchor point="RIGHT" relativeTo="$parentScanButton" relativePoint="LEFT">
+                    <Anchor point="LEFT" relativeTo="$parentScanButton" relativePoint="RIGHT">
                         <Offset>
-                            <AbsDimension x="-5" y="0"/>
+                            <AbsDimension x="6" y="0"/>
                         </Offset>
                     </Anchor>
                 </Anchors>
+                <Backdrop bgFile="Interface\Buttons\WHITE8X8"
+                          edgeFile="Interface\Buttons\WHITE8X8"
+                          tile="true">
+                    <BackgroundInsets>
+                        <AbsInset left="1" right="1" top="1" bottom="1"/>
+                    </BackgroundInsets>
+                    <EdgeSize>
+                        <AbsValue val="1"/>
+                    </EdgeSize>
+                    <Color r="0.4" g="0.13" b="0.13" a="0.9"/>
+                    <BorderColor r="0.55" g="0.18" b="0.18" a="1"/>
+                </Backdrop>
+                <NormalFont style="GameFontNormal"/>
+                <HighlightFont style="GameFontHighlight"/>
                 <Scripts>
                     <OnClick>
                         PoweredAuction_UIRemoveSelected()
                     </OnClick>
+                    <OnEnter>
+                        this:SetBackdropColor(0.55, 0.18, 0.18, 0.95)
+                    </OnEnter>
+                    <OnLeave>
+                        this:SetBackdropColor(0.4, 0.13, 0.13, 0.9)
+                    </OnLeave>
                 </Scripts>
             </Button>
+
+            <ScrollFrame name="$parentItemListScrollFrame" inherits="UIPanelScrollFrameTemplate">
+                <Size>
+                    <AbsDimension x="490" y="370"/>
+                </Size>
+                <Anchors>
+                    <Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
+                        <Offset>
+                            <AbsDimension x="10" y="-93"/>
+                        </Offset>
+                    </Anchor>
+                </Anchors>
+                <Scripts>
+                    <OnVerticalScroll>
+                        FauxScrollFrame_OnVerticalScroll(arg1, 24, PoweredAuction_UpdateItemList)
+                    </OnVerticalScroll>
+                </Scripts>
+                <ScrollChild>
+                    <Frame name="$parentItemList" enableMouse="true">
+                        <Size>
+                            <AbsDimension x="490" y="370"/>
+                        </Size>
+                    </Frame>
+                </ScrollChild>
+            </ScrollFrame>
         </Frames>
 
         <Scripts>

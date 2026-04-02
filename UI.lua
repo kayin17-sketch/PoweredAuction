@@ -1,4 +1,4 @@
-local PA_UI_ITEM_HEIGHT = 20
+local PA_UI_ITEM_HEIGHT = 24
 local PA_UI_MAX_VISIBLE = 15
 local selectedItemIndex = nil
 local itemButtonsCreated = false
@@ -60,6 +60,39 @@ function PoweredAuction_UIRemoveSelected()
     end
 end
 
+local function GetMoneyString(copper)
+    if not copper or copper == 0 then return "|cFF93978B---|r" end
+
+    local gold = math.floor(copper / 10000)
+    local silver = math.floor(math.mod(copper, 10000) / 100)
+    local remaining = math.mod(copper, 100)
+
+    local result = ""
+    if gold > 0 then
+        result = result .. "|cFFFFFF00" .. gold .. "g|r "
+    end
+    if silver > 0 or gold > 0 then
+        result = result .. "|cFFC0C0C0" .. silver .. "s|r "
+    end
+    result = result .. "|cFFEDA55F" .. remaining .. "c|r"
+    return result
+end
+
+local function GetLastScanData(itemName)
+    if not itemName then return nil, 0 end
+    local key = string.lower(itemName)
+    if not PoweredAuctionDB.scanHistory or not PoweredAuctionDB.scanHistory[key] then
+        return nil, 0
+    end
+
+    local history = PoweredAuctionDB.scanHistory[key]
+    local scanCount = table.getn(history.scans or {})
+    if scanCount == 0 then return nil, 0 end
+
+    local lastScan = history.scans[scanCount]
+    return lastScan, scanCount
+end
+
 function PoweredAuction_CreateItemButtons()
     if itemButtonsCreated then return end
 
@@ -69,23 +102,49 @@ function PoweredAuction_CreateItemButtons()
     for i = 1, PA_UI_MAX_VISIBLE do
         local button = CreateFrame("Button", "PoweredAuctionItemButton" .. i, itemFrame)
         button:SetHeight(PA_UI_ITEM_HEIGHT)
-        button:SetWidth(330)
+        button:SetWidth(470)
         button:SetPoint("TOPLEFT", itemFrame, "TOPLEFT", 0, -(i - 1) * PA_UI_ITEM_HEIGHT)
 
+        local bg = button:CreateTexture("PoweredAuctionItemButton" .. i .. "Bg", "BACKGROUND")
+        bg:SetTexture("Interface\\Buttons\\WHITE8X8")
+        bg:SetAllPoints(button)
+        bg:SetVertexColor(0.16, 0.16, 0.16, 1)
+
         local highlightTexture = button:CreateTexture("PoweredAuctionItemButton" .. i .. "Highlight")
-        highlightTexture:SetTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight")
+        highlightTexture:SetTexture("Interface\\Buttons\\WHITE8X8")
         highlightTexture:SetAllPoints(button)
+        highlightTexture:SetVertexColor(1, 0.85, 0, 0.12)
         button:SetHighlightTexture(highlightTexture)
 
-        local text = button:CreateFontString("PoweredAuctionItemButtonText" .. i, "ARTWORK",
-                                              "GameFontHighlight")
-        text:SetJustifyH("LEFT")
-        text:SetPoint("LEFT", button, "LEFT", 5, 0)
+        local selectedTexture = button:CreateTexture("PoweredAuctionItemButton" .. i .. "Selected", "ARTWORK")
+        selectedTexture:SetTexture("Interface\\Buttons\\WHITE8X8")
+        selectedTexture:SetAllPoints(button)
+        selectedTexture:SetVertexColor(1, 0.85, 0, 0.18)
+        selectedTexture:Hide()
 
-        local scanCount = button:CreateFontString("PoweredAuctionItemButtonScanCount" .. i, "ARTWORK",
-                                                    "GameFontNormalSmall")
-        scanCount:SetJustifyH("RIGHT")
-        scanCount:SetPoint("RIGHT", button, "RIGHT", -5, 0)
+        local nameText = button:CreateFontString("PoweredAuctionItemButtonText" .. i, "ARTWORK",
+                                                "GameFontHighlight")
+        nameText:SetJustifyH("LEFT")
+        nameText:SetPoint("LEFT", button, "LEFT", 8, 0)
+        nameText:SetWidth(200)
+
+        local priceText = button:CreateFontString("PoweredAuctionItemButtonPrice" .. i, "ARTWORK",
+                                                   "GameFontNormalSmall")
+        priceText:SetJustifyH("RIGHT")
+        priceText:SetPoint("RIGHT", button, "RIGHT", -155, 0)
+        priceText:SetWidth(120)
+
+        local qtyText = button:CreateFontString("PoweredAuctionItemButtonQty" .. i, "ARTWORK",
+                                                 "GameFontNormalSmall")
+        qtyText:SetJustifyH("RIGHT")
+        qtyText:SetPoint("RIGHT", button, "RIGHT", -85, 0)
+        qtyText:SetWidth(60)
+
+        local scanCountText = button:CreateFontString("PoweredAuctionItemButtonScanCount" .. i, "ARTWORK",
+                                                       "GameFontNormalSmall")
+        scanCountText:SetJustifyH("RIGHT")
+        scanCountText:SetPoint("RIGHT", button, "RIGHT", -8, 0)
+        scanCountText:SetWidth(65)
 
         button:SetScript("OnClick", function()
             local idx = this.dataIndex
@@ -122,8 +181,12 @@ function PoweredAuction_UpdateItemList()
 
     for i = 1, PA_UI_MAX_VISIBLE do
         local button = getglobal("PoweredAuctionItemButton" .. i)
-        local text = getglobal("PoweredAuctionItemButtonText" .. i)
-        local scanCount = getglobal("PoweredAuctionItemButtonScanCount" .. i)
+        local nameText = getglobal("PoweredAuctionItemButtonText" .. i)
+        local priceText = getglobal("PoweredAuctionItemButtonPrice" .. i)
+        local qtyText = getglobal("PoweredAuctionItemButtonQty" .. i)
+        local scanCountText = getglobal("PoweredAuctionItemButtonScanCount" .. i)
+        local bg = getglobal("PoweredAuctionItemButton" .. i .. "Bg")
+        local selectedTex = getglobal("PoweredAuctionItemButton" .. i .. "Selected")
 
         if not button then return end
 
@@ -131,23 +194,38 @@ function PoweredAuction_UpdateItemList()
 
         if dataIndex <= numItems then
             local itemName = watchList[dataIndex]
-            text:SetText(itemName or "Unknown")
+            nameText:SetText(itemName or "Unknown")
 
-            local historyCount = 0
-            if itemName then
-                local key = string.lower(itemName)
-                if PoweredAuctionDB.scanHistory and PoweredAuctionDB.scanHistory[key] then
-                    historyCount = table.getn(PoweredAuctionDB.scanHistory[key].scans or {})
-                end
+            local lastScan, scanCount = GetLastScanData(itemName)
+
+            if lastScan and lastScan.buyout and lastScan.buyout > 0 then
+                priceText:SetText(GetMoneyString(lastScan.buyout))
+            else
+                priceText:SetText("|cFF93978B---|r")
             end
-            scanCount:SetText(historyCount > 0 and (historyCount .. " scans") or "")
+
+            if lastScan and lastScan.quantity then
+                qtyText:SetText("|cFFD8E1D3x" .. lastScan.quantity .. "|r")
+            else
+                qtyText:SetText("")
+            end
+
+            scanCountText:SetText(scanCount > 0 and ("|cFF99FFFF" .. scanCount .. " scans|r") or "|cFF93978B0|r")
 
             button.dataIndex = dataIndex
 
-            if selectedItemIndex == dataIndex then
-                button:LockHighlight()
+            if i > 1 then
+                bg:SetVertexColor(0.18, 0.18, 0.18, 1)
             else
-                button:UnlockHighlight()
+                bg:SetVertexColor(0.14, 0.14, 0.14, 1)
+            end
+
+            if selectedItemIndex == dataIndex then
+                selectedTex:Show()
+                nameText:SetTextColor(1, 0.85, 0)
+            else
+                selectedTex:Hide()
+                nameText:SetTextColor(0.84, 0.88, 0.83)
             end
 
             button:Show()

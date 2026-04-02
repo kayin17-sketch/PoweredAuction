@@ -244,7 +244,9 @@ function PoweredAuction_UpdateScanButton()
 
     if scanState.isScanning then
         scanButton:SetText("Cancel")
+        scanButton:SetBackdropColor(0.45, 0.15, 0.15, 0.9)
     else
-        scanButton:SetText("Scan AH")
+        scanButton:SetText("Scan")
+        scanButton:SetBackdropColor(0.15, 0.35, 0.15, 0.9)
     end
 end
