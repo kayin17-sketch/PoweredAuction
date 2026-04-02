@@ -1,5 +1,5 @@
 local PA_SCAN_DELAY = 1.0
-local PA_QUERY_POLL_DELAY = 0.5
+local PA_QUERY_TIMEOUT = 8.0
 local PA_QUERY_MAX_RETRIES = 10
 
 local ahIsOpen = false
@@ -11,6 +11,8 @@ local scanState = {
     currentPage = 0,
     totalScannedItems = 0,
     queryRetries = 0,
+    waitingForResults = false,
+    queryTime = 0,
 }
 
 local scanTimerFrame = CreateFrame("Frame", "PoweredAuctionScanTimerFrame")
@@ -103,10 +105,10 @@ function PoweredAuction_ScanNextItem()
     PoweredAuction_SetStatusText("Scanning: " .. scanState.currentItemName ..
         " (" .. scanState.currentIndex .. "/" .. table.getn(PoweredAuctionDB.watchList) .. ")")
 
-    PoweredAuction_QueryAuctionPage(scanState.currentItemName, 0)
+    PoweredAuction_SubmitQuery(scanState.currentItemName, 0)
 end
 
-function PoweredAuction_QueryAuctionPage(itemName, page)
+function PoweredAuction_SubmitQuery(itemName, page)
     if not scanState.isScanning then return end
 
     if not IsAuctionHouseOpen() then
@@ -138,17 +140,35 @@ function PoweredAuction_WaitAndQuery(itemName, page)
     end
 
     scanState.queryRetries = 0
+    scanState.waitingForResults = true
+    scanState.queryTime = GetTime()
+
     QueryAuctionItems(itemName, nil, nil, nil, nil, nil, page, nil, nil)
 
     ScheduleCallback(function()
-        PoweredAuction_ProcessScanResults()
-    end, PA_QUERY_POLL_DELAY)
+        if scanState.waitingForResults then
+            PoweredAuction_ProcessScanResults()
+        end
+    end, PA_QUERY_TIMEOUT)
+end
+
+function PoweredAuction_OnAuctionItemListUpdate()
+    if not scanState.isScanning then return end
+    if not scanState.waitingForResults then return end
+
+    scanState.waitingForResults = false
+    scanTimerFrame:Hide()
+    scanTimerFrame.callback = nil
+
+    PoweredAuction_ProcessScanResults()
 end
 
 function PoweredAuction_ProcessScanResults()
     if not scanState.isScanning then return end
 
     local numBatchAuctions, totalAuctions = GetNumAuctionItems("list")
+
+    PoweredAuction_Print("Query \"" .. scanState.currentItemName .. "\" page " .. scanState.currentPage .. ": " .. numBatchAuctions .. " items in batch, " .. totalAuctions .. " total.")
 
     if numBatchAuctions == 0 then
         PoweredAuction_AdvanceItem()
@@ -162,8 +182,11 @@ function PoweredAuction_ProcessScanResults()
         local name, texture, count, quality, canUse, level, minBid, minIncrement, buyoutPrice,
             bidAmount, highBidder, owner, saleStatus = GetAuctionItemInfo("list", i)
 
-        if name and buyoutPrice and buyoutPrice > 0 and count and count > 0 then
-            local buyoutPerUnit = math.floor(buyoutPrice / count)
+        if name and count and count > 0 then
+            local buyoutPerUnit = 0
+            if buyoutPrice and buyoutPrice > 0 then
+                buyoutPerUnit = math.floor(buyoutPrice / count)
+            end
 
             local itemID = 0
             local cachedName, _, _, _, _, _, _, _, _, _, cachedItemID = GetItemInfo(name)
@@ -179,7 +202,7 @@ function PoweredAuction_ProcessScanResults()
     if scanState.currentPage < totalPages - 1 then
         local nextPage = scanState.currentPage + 1
         ScheduleCallback(function()
-            PoweredAuction_QueryAuctionPage(scanState.currentItemName, nextPage)
+            PoweredAuction_SubmitQuery(scanState.currentItemName, nextPage)
         end, PA_SCAN_DELAY)
     else
         PoweredAuction_AdvanceItem()
@@ -196,6 +219,7 @@ end
 
 function PoweredAuction_FinishScan()
     scanState.isScanning = false
+    scanState.waitingForResults = false
 
     PoweredAuction_Print("Scan complete! " .. scanState.totalScannedItems .. " records processed.")
     PoweredAuction_SetStatusText("Scan complete!")
@@ -205,6 +229,9 @@ end
 
 function PoweredAuction_CancelScan(reason)
     scanState.isScanning = false
+    scanState.waitingForResults = false
+    scanTimerFrame:Hide()
+    scanTimerFrame.callback = nil
 
     PoweredAuction_PrintError(reason or "Scan cancelled.")
     PoweredAuction_SetStatusText("Scan cancelled.")

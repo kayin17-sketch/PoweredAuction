@@ -12,6 +12,8 @@ function PoweredAuction_OnEvent(event)
         PoweredAuction_AHOpened()
     elseif event == "AUCTION_HOUSE_CLOSED" then
         PoweredAuction_AHClosed()
+    elseif event == "AUCTION_ITEM_LIST_UPDATE" then
+        PoweredAuction_OnAuctionItemListUpdate()
     end
 end
 

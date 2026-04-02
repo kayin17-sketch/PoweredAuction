@@ -192,6 +192,7 @@
                 this:RegisterEvent("VARIABLES_LOADED")
                 this:RegisterEvent("AUCTION_HOUSE_SHOW")
                 this:RegisterEvent("AUCTION_HOUSE_CLOSED")
+                this:RegisterEvent("AUCTION_ITEM_LIST_UPDATE")
             </OnLoad>
             <OnEvent>
                 PoweredAuction_OnEvent(event)
