@@ -271,7 +271,7 @@ function PoweredAuction_CreateItemButtons()
     for i = 1, PA_UI_MAX_VISIBLE do
         local button = CreateFrame("Button", "PoweredAuctionItemButton" .. i, itemFrame)
         button:SetHeight(PA_UI_ITEM_HEIGHT)
-        button:SetWidth(470)
+        button:SetWidth(454)
         button:SetPoint("TOPLEFT", itemFrame, "TOPLEFT", 0, -(i - 1) * PA_UI_ITEM_HEIGHT)
 
         local bg = button:CreateTexture("PoweredAuctionItemButton" .. i .. "Bg", "BACKGROUND")

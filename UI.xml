@@ -70,7 +70,7 @@
 
                 <Texture name="$parentListHeaderBg">
                     <Size>
-                        <AbsDimension x="490" y="20"/>
+                        <AbsDimension x="470" y="20"/>
                     </Size>
                     <Anchors>
                         <Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
@@ -166,7 +166,7 @@
 
             <EditBox name="$parentItemInput" autoFocus="false" letters="60">
                 <Size>
-                    <AbsDimension x="300" y="24"/>
+                    <AbsDimension x="280" y="24"/>
                 </Size>
                 <Anchors>
                     <Anchor point="TOPLEFT" relativeTo="$parentToolbarBg" relativePoint="TOPLEFT">
@@ -211,7 +211,7 @@
                 <Anchors>
                     <Anchor point="LEFT" relativeTo="$parentItemInput" relativePoint="RIGHT">
                         <Offset>
-                            <AbsDimension x="6" y="0"/>
+                            <AbsDimension x="4" y="0"/>
                         </Offset>
                     </Anchor>
                 </Anchors>
@@ -249,7 +249,7 @@
                 <Anchors>
                     <Anchor point="LEFT" relativeTo="$parentAddButton" relativePoint="RIGHT">
                         <Offset>
-                            <AbsDimension x="6" y="0"/>
+                            <AbsDimension x="4" y="0"/>
                         </Offset>
                     </Anchor>
                 </Anchors>
@@ -288,7 +288,7 @@
                 <Anchors>
                     <Anchor point="LEFT" relativeTo="$parentScanButton" relativePoint="RIGHT">
                         <Offset>
-                            <AbsDimension x="6" y="0"/>
+                            <AbsDimension x="4" y="0"/>
                         </Offset>
                     </Anchor>
                 </Anchors>
@@ -321,7 +321,7 @@
 
             <ScrollFrame name="$parentItemListScrollFrame" inherits="UIPanelScrollFrameTemplate">
                 <Size>
-                    <AbsDimension x="490" y="370"/>
+                    <AbsDimension x="470" y="370"/>
                 </Size>
                 <Anchors>
                     <Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
@@ -338,7 +338,7 @@
                 <ScrollChild>
                     <Frame name="$parentItemList" enableMouse="true">
                         <Size>
-                            <AbsDimension x="490" y="370"/>
+                            <AbsDimension x="470" y="370"/>
                         </Size>
                     </Frame>
                 </ScrollChild>
