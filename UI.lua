@@ -1,12 +1,21 @@
 local PA_UI_ITEM_HEIGHT = 24
 local PA_UI_MAX_VISIBLE = 15
+local PA_DROPDOWN_MAX = 8
+local PA_DROPDOWN_HEIGHT = 22
 local selectedItemIndex = nil
 local itemButtonsCreated = false
+local dropdownCreated = false
+local knownItems = {}
+local knownItemsBuilt = false
 
 function PoweredAuction_OnEvent(event)
     if event == "VARIABLES_LOADED" then
         PoweredAuction_InitDB()
         PoweredAuction_CreateItemButtons()
+        PoweredAuction_CreateDropdown()
+        getglobal("PoweredAuctionFrameAddButton"):SetText("Add")
+        getglobal("PoweredAuctionFrameScanButton"):SetText("Scan")
+        getglobal("PoweredAuctionFrameRemoveButton"):SetText("Remove")
         PoweredAuction_Print("Loaded v" .. PoweredAuction.version .. ". Type /pa for help.")
     elseif event == "AUCTION_HOUSE_SHOW" then
         PoweredAuction_AHOpened()
@@ -21,7 +30,6 @@ function PoweredAuction_ToggleUI(show)
     if show == nil then
         show = not PoweredAuctionFrame:IsVisible()
     end
-
     if show then
         PoweredAuctionFrame:Show()
     else
@@ -29,10 +37,160 @@ function PoweredAuction_ToggleUI(show)
     end
 end
 
+function PoweredAuction_RebuildKnownItems()
+    knownItems = {}
+    local seen = {}
+    if PoweredAuctionDB.scanHistory then
+        for key, data in PoweredAuctionDB.scanHistory do
+            if data.name and not seen[string.lower(data.name)] then
+                table.insert(knownItems, data.name)
+                seen[string.lower(data.name)] = true
+            end
+        end
+    end
+    knownItemsBuilt = true
+end
+
+function PoweredAuction_OnInputTextChanged()
+    local input = getglobal("PoweredAuctionFrameItemInput")
+    if not input then return end
+    local text = PoweredAuction_Trim(input:GetText() or "")
+    if text == "" or string.len(text) < 2 then
+        PoweredAuction_HideDropdown()
+        return
+    end
+    if not knownItemsBuilt then
+        PoweredAuction_RebuildKnownItems()
+    end
+    local lowerText = string.lower(text)
+    local matches = {}
+    for _, name in ipairs(knownItems) do
+        if string.find(string.lower(name), lowerText, 1, true) then
+            table.insert(matches, name)
+            if table.getn(matches) >= PA_DROPDOWN_MAX then
+                break
+            end
+        end
+    end
+    if table.getn(matches) == 0 then
+        PoweredAuction_HideDropdown()
+        return
+    end
+    PoweredAuction_ShowDropdown(matches)
+end
+
+function PoweredAuction_CreateDropdown()
+    if dropdownCreated then return end
+
+    local dropdown = CreateFrame("Frame", "PoweredAuctionDropdown", PoweredAuctionFrame)
+    dropdown:SetWidth(300)
+    dropdown:SetHeight(PA_DROPDOWN_MAX * PA_DROPDOWN_HEIGHT + 4)
+    dropdown:SetPoint("TOPLEFT", "PoweredAuctionFrameItemInput", "BOTTOMLEFT", 0, -2)
+    dropdown:SetFrameStrata("TOOLTIP")
+    dropdown:EnableMouse(true)
+    dropdown:Hide()
+    dropdown:SetBackdrop({
+        bgFile = "Interface\\Buttons\\WHITE8X8",
+        edgeFile = "Interface\\Buttons\\WHITE8X8",
+        tile = true, tileSize = 32, edgeSize = 1,
+        insets = { left = 1, right = 1, top = 1, bottom = 1 }
+    })
+    dropdown:SetBackdropColor(0.09, 0.09, 0.09, 0.97)
+    dropdown:SetBackdropBorderColor(0.3, 0.3, 0.3, 1)
+
+    for i = 1, PA_DROPDOWN_MAX do
+        local btn = CreateFrame("Button", "PoweredAuctionDropdownButton" .. i, dropdown)
+        btn:SetWidth(294)
+        btn:SetHeight(PA_DROPDOWN_HEIGHT)
+        btn:SetPoint("TOPLEFT", dropdown, "TOPLEFT", 3, -2 - (i - 1) * PA_DROPDOWN_HEIGHT)
+
+        local btnBg = btn:CreateTexture(nil, "BACKGROUND")
+        btnBg:SetTexture("Interface\\Buttons\\WHITE8X8")
+        btnBg:SetAllPoints(btn)
+        btnBg:SetVertexColor(0.12, 0.12, 0.12, 1)
+        btn.bg = btnBg
+
+        local btnHighlight = btn:CreateTexture(nil, "HIGHLIGHT")
+        btnHighlight:SetTexture("Interface\\Buttons\\WHITE8X8")
+        btnHighlight:SetAllPoints(btn)
+        btnHighlight:SetVertexColor(0.2, 0.35, 0.55, 0.6)
+
+        local btnText = btn:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+        btnText:SetJustifyH("LEFT")
+        btnText:SetPoint("LEFT", btn, "LEFT", 6, 0)
+        btnText:SetPoint("RIGHT", btn, "RIGHT", -6, 0)
+        btnText:SetTextColor(0.84, 0.88, 0.83, 1)
+
+        btn:SetScript("OnClick", function()
+            local itemName = this.itemName
+            if itemName then
+                getglobal("PoweredAuctionFrameItemInput"):SetText("")
+                PoweredAuction_HideDropdown()
+                PoweredAuction_AddToWatchList(itemName)
+            end
+        end)
+
+        btn:SetScript("OnEnter", function()
+            this.bg:SetVertexColor(0.18, 0.28, 0.42, 1)
+            for _, r in { this:GetRegions() } do
+                if r:IsObjectType("FontString") then
+                    r:SetTextColor(1, 0.85, 0, 1)
+                    break
+                end
+            end
+        end)
+
+        btn:SetScript("OnLeave", function()
+            this.bg:SetVertexColor(0.12, 0.12, 0.12, 1)
+            for _, r in { this:GetRegions() } do
+                if r:IsObjectType("FontString") then
+                    r:SetTextColor(0.84, 0.88, 0.83, 1)
+                    break
+                end
+            end
+        end)
+    end
+
+    dropdownCreated = true
+end
+
+function PoweredAuction_ShowDropdown(matches)
+    local dropdown = getglobal("PoweredAuctionDropdown")
+    if not dropdown then return end
+    local numMatches = table.getn(matches)
+    dropdown:SetHeight(numMatches * PA_DROPDOWN_HEIGHT + 4)
+    for i = 1, PA_DROPDOWN_MAX do
+        local btn = getglobal("PoweredAuctionDropdownButton" .. i)
+        if not btn then break end
+        if i <= numMatches then
+            btn.itemName = matches[i]
+            for _, r in { btn:GetRegions() } do
+                if r:IsObjectType("FontString") then
+                    r:SetText(matches[i])
+                    r:SetTextColor(0.84, 0.88, 0.83, 1)
+                    break
+                end
+            end
+            btn:Show()
+        else
+            btn.itemName = nil
+            btn:Hide()
+        end
+    end
+    dropdown:Show()
+end
+
+function PoweredAuction_HideDropdown()
+    local dropdown = getglobal("PoweredAuctionDropdown")
+    if dropdown then
+        dropdown:Hide()
+    end
+end
+
 function PoweredAuction_UIAddItem()
+    PoweredAuction_HideDropdown()
     local input = getglobal("PoweredAuctionFrameItemInput")
     local text = input:GetText()
-
     if text and text ~= "" then
         local extractedName = PoweredAuction_ExtractItemName(text)
         if extractedName then
@@ -62,11 +220,9 @@ end
 
 local function GetMoneyString(copper)
     if not copper or copper == 0 then return "|cFF93978B---|r" end
-
     local gold = math.floor(copper / 10000)
     local silver = math.floor(math.mod(copper, 10000) / 100)
     local remaining = math.mod(copper, 100)
-
     local result = ""
     if gold > 0 then
         result = result .. "|cFFFFFF00" .. gold .. "g|r "
@@ -84,18 +240,15 @@ local function GetLastScanData(itemName)
     if not PoweredAuctionDB.scanHistory or not PoweredAuctionDB.scanHistory[key] then
         return nil, 0
     end
-
     local history = PoweredAuctionDB.scanHistory[key]
     local scanCount = table.getn(history.scans or {})
     if scanCount == 0 then return nil, 0 end
-
     local lastScan = history.scans[scanCount]
     return lastScan, scanCount
 end
 
 function PoweredAuction_CreateItemButtons()
     if itemButtonsCreated then return end
-
     local itemFrame = getglobal("PoweredAuctionFrameItemList")
     if not itemFrame then return end
 

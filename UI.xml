@@ -198,6 +198,9 @@
                     <OnReceiveDrag>
                         PoweredAuction_OnReceiveDrag()
                     </OnReceiveDrag>
+                    <OnTextChanged>
+                        PoweredAuction_OnInputTextChanged()
+                    </OnTextChanged>
                 </Scripts>
             </EditBox>
 
