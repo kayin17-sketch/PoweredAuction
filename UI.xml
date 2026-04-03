@@ -70,7 +70,7 @@
 
                 <Texture name="$parentListHeaderBg">
                     <Size>
-                        <AbsDimension x="470" y="20"/>
+                        <AbsDimension x="448" y="20"/>
                     </Size>
                     <Anchors>
                         <Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
@@ -319,7 +319,7 @@
                 </Scripts>
             </Button>
 
-            <ScrollFrame name="$parentItemListScrollFrame" inherits="UIPanelScrollFrameTemplate">
+            <ScrollFrame name="$parentItemListScrollFrame" inherits="FauxScrollFrameTemplate">
                 <Size>
                     <AbsDimension x="470" y="370"/>
                 </Size>
@@ -335,14 +335,20 @@
                         FauxScrollFrame_OnVerticalScroll(arg1, 24, PoweredAuction_UpdateItemList)
                     </OnVerticalScroll>
                 </Scripts>
-                <ScrollChild>
-                    <Frame name="$parentItemList" enableMouse="true">
-                        <Size>
-                            <AbsDimension x="470" y="370"/>
-                        </Size>
-                    </Frame>
-                </ScrollChild>
             </ScrollFrame>
+
+            <Frame name="$parentItemList" enableMouse="true">
+                <Size>
+                    <AbsDimension x="448" y="370"/>
+                </Size>
+                <Anchors>
+                    <Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
+                        <Offset>
+                            <AbsDimension x="10" y="-93"/>
+                        </Offset>
+                    </Anchor>
+                </Anchors>
+            </Frame>
         </Frames>
 
         <Scripts>
