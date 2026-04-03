@@ -259,8 +259,23 @@ local function GetLastScanData(itemName)
     local history = PoweredAuctionDB.scanHistory[key]
     local scanCount = table.getn(history.scans or {})
     if scanCount == 0 then return nil, 0 end
-    local lastScan = history.scans[scanCount]
-    return lastScan, scanCount
+
+    local lastTimestamp = history.scans[scanCount].timestamp
+    local minBuyout = nil
+    local totalQty = 0
+
+    for _, scan in pairs(history.scans) do
+        if scan.timestamp == lastTimestamp then
+            if scan.buyout and scan.buyout > 0 then
+                if not minBuyout or scan.buyout < minBuyout then
+                    minBuyout = scan.buyout
+                end
+            end
+            totalQty = totalQty + (scan.quantity or 0)
+        end
+    end
+
+    return { buyout = minBuyout, quantity = totalQty }, scanCount
 end
 
 function PoweredAuction_CreateItemButtons()

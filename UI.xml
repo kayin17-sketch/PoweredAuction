@@ -104,7 +104,7 @@
                     <Color r="0.6" g="0.6" b="0.6" a="1"/>
                 </FontString>
 
-                <FontString name="$parentColQty" inherits="GameFontNormalSmall" text="Qty">
+                <FontString name="$parentColQty" inherits="GameFontNormalSmall" text="Total">
                     <Anchors>
                         <Anchor point="LEFT" relativeTo="$parentListHeaderBg" relativePoint="LEFT">
                             <Offset>
