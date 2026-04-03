@@ -41,7 +41,7 @@ function PoweredAuction_RebuildKnownItems()
     knownItems = {}
     local seen = {}
     if PoweredAuctionDB.scanHistory then
-        for key, data in PoweredAuctionDB.scanHistory do
+        for key, data in pairs(PoweredAuctionDB.scanHistory) do
             if data.name and not seen[string.lower(data.name)] then
                 table.insert(knownItems, data.name)
                 seen[string.lower(data.name)] = true
@@ -132,7 +132,7 @@ function PoweredAuction_CreateDropdown()
 
         btn:SetScript("OnEnter", function()
             this.bg:SetVertexColor(0.18, 0.28, 0.42, 1)
-            for _, r in { this:GetRegions() } do
+            for _, r in pairs({ this:GetRegions() }) do
                 if r:IsObjectType("FontString") then
                     r:SetTextColor(1, 0.85, 0, 1)
                     break
@@ -142,7 +142,7 @@ function PoweredAuction_CreateDropdown()
 
         btn:SetScript("OnLeave", function()
             this.bg:SetVertexColor(0.12, 0.12, 0.12, 1)
-            for _, r in { this:GetRegions() } do
+            for _, r in pairs({ this:GetRegions() }) do
                 if r:IsObjectType("FontString") then
                     r:SetTextColor(0.84, 0.88, 0.83, 1)
                     break
@@ -164,7 +164,7 @@ function PoweredAuction_ShowDropdown(matches)
         if not btn then break end
         if i <= numMatches then
             btn.itemName = matches[i]
-            for _, r in { btn:GetRegions() } do
+            for _, r in pairs({ btn:GetRegions() }) do
                 if r:IsObjectType("FontString") then
                     r:SetText(matches[i])
                     r:SetTextColor(0.84, 0.88, 0.83, 1)
@@ -367,7 +367,7 @@ function PoweredAuction_UpdateItemList()
 
             button.dataIndex = dataIndex
 
-            if i > 1 then
+            if math.mod(i, 2) == 0 then
                 bg:SetVertexColor(0.18, 0.18, 0.18, 1)
             else
                 bg:SetVertexColor(0.14, 0.14, 0.14, 1)

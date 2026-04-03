@@ -61,7 +61,10 @@ PickupContainerItem = function(bag, slot)
     if PoweredAuctionFrame and PoweredAuctionFrame:IsVisible() then
         itemLink = GetContainerItemLink(bag, slot)
     end
-    local result = orig_PickupContainerItem(bag, slot)
+    local result
+    if orig_PickupContainerItem then
+        result = orig_PickupContainerItem(bag, slot)
+    end
     if itemLink and CursorHasItem() then
         lastDraggedItemName = PoweredAuction_ExtractItemName(itemLink)
     end

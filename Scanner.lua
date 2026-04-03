@@ -189,9 +189,12 @@ function PoweredAuction_ProcessScanResults()
             end
 
             local itemID = 0
-            local cachedName, _, _, _, _, _, _, _, _, _, cachedItemID = GetItemInfo(name)
-            if cachedItemID then
-                itemID = cachedItemID
+            local _, cachedLink = GetItemInfo(name)
+            if cachedLink then
+                local _, _, id = string.find(cachedLink, "item:(%d+)")
+                if id then
+                    itemID = tonumber(id)
+                end
             end
 
             PoweredAuction_AddScanResult(name, buyoutPerUnit, count, itemID)

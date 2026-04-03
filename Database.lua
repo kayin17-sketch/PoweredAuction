@@ -95,7 +95,7 @@ function PoweredAuction_AddScanResult(itemName, buyout, quantity, itemID)
     local timestamp = time()
 
     for _, scan in ipairs(history.scans) do
-        if scan.timestamp == timestamp and scan.buyout == buyout then
+        if scan.timestamp == timestamp and scan.buyout == buyout and scan.quantity == quantity then
             return
         end
     end
