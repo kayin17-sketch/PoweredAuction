@@ -246,10 +246,10 @@ function PoweredAuction_UpdateScanButton()
     if not scanButton then return end
 
     if scanState.isScanning then
-        scanButton:SetText("Cancel")
+        PoweredAuction_SetButtonText("PoweredAuctionFrameScanButton", "Cancel")
         scanButton:SetBackdropColor(0.45, 0.15, 0.15, 0.9)
     else
-        scanButton:SetText("Scan")
+        PoweredAuction_SetButtonText("PoweredAuctionFrameScanButton", "Scan")
         scanButton:SetBackdropColor(0.15, 0.35, 0.15, 0.9)
     end
 end

@@ -8,14 +8,30 @@ local dropdownCreated = false
 local knownItems = {}
 local knownItemsBuilt = false
 
+function PoweredAuction_SetButtonFont(buttonName, text)
+    local button = getglobal(buttonName)
+    if not button then return end
+    local fs = button:CreateFontString(buttonName .. "Text", "ARTWORK", "GameFontHighlight")
+    fs:SetPoint("CENTER", button, "CENTER", 0, 0)
+    fs:SetText(text)
+    button.fontText = fs
+end
+
+function PoweredAuction_SetButtonText(buttonName, text)
+    local button = getglobal(buttonName)
+    if button and button.fontText then
+        button.fontText:SetText(text)
+    end
+end
+
 function PoweredAuction_OnEvent(event)
     if event == "VARIABLES_LOADED" then
         PoweredAuction_InitDB()
         PoweredAuction_CreateItemButtons()
         PoweredAuction_CreateDropdown()
-        getglobal("PoweredAuctionFrameAddButton"):SetText("Add")
-        getglobal("PoweredAuctionFrameScanButton"):SetText("Scan")
-        getglobal("PoweredAuctionFrameRemoveButton"):SetText("Remove")
+        PoweredAuction_SetButtonFont("PoweredAuctionFrameAddButton", "Add")
+        PoweredAuction_SetButtonFont("PoweredAuctionFrameScanButton", "Scan")
+        PoweredAuction_SetButtonFont("PoweredAuctionFrameRemoveButton", "Remove")
         PoweredAuction_Print("Loaded v" .. PoweredAuction.version .. ". Type /pa for help.")
     elseif event == "AUCTION_HOUSE_SHOW" then
         PoweredAuction_AHOpened()
