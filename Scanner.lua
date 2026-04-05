@@ -6,14 +6,31 @@ local ahIsOpen = false
 
 local scanState = {
     isScanning = false,
+    scanMode = nil,
     currentIndex = 0,
     currentItemName = nil,
     currentPage = 0,
+    totalPages = 0,
     totalScannedItems = 0,
     queryRetries = 0,
     waitingForResults = false,
     queryTime = 0,
 }
+
+local PA_ANTI_AFK_INTERVAL = 120
+
+local afkTimerFrame = CreateFrame("Frame", "PoweredAuctionAFKTimerFrame")
+afkTimerFrame:Hide()
+afkTimerFrame.elapsed = 0
+
+afkTimerFrame:SetScript("OnUpdate", function()
+    this.elapsed = this.elapsed + arg1
+    if this.elapsed >= PA_ANTI_AFK_INTERVAL then
+        this.elapsed = 0
+        MoveForwardStart()
+        MoveForwardStop()
+    end
+end)
 
 local scanTimerFrame = CreateFrame("Frame", "PoweredAuctionScanTimerFrame")
 scanTimerFrame:Hide()
@@ -75,6 +92,7 @@ function PoweredAuction_StartScan()
     end
 
     scanState.isScanning = true
+    scanState.scanMode = "watchlist"
     scanState.currentIndex = 1
     scanState.totalScannedItems = 0
 
@@ -82,7 +100,39 @@ function PoweredAuction_StartScan()
     PoweredAuction_SetStatusText("Scanning...")
     PoweredAuction_UpdateScanButton()
 
+    afkTimerFrame.elapsed = 0
+    afkTimerFrame:Show()
+
     PoweredAuction_ScanNextItem()
+end
+
+function PoweredAuction_StartFullScan()
+    if not IsAuctionHouseOpen() then
+        PoweredAuction_PrintError("Auction House must be open to scan.")
+        return
+    end
+
+    if scanState.isScanning then
+        PoweredAuction_CancelScan("Scan cancelled by user.")
+        return
+    end
+
+    scanState.isScanning = true
+    scanState.scanMode = "full"
+    scanState.currentIndex = 0
+    scanState.currentItemName = ""
+    scanState.currentPage = 0
+    scanState.totalPages = 0
+    scanState.totalScannedItems = 0
+
+    PoweredAuction_Print("Starting full AH scan...")
+    PoweredAuction_SetStatusText("Full scan...")
+    PoweredAuction_UpdateScanButton()
+
+    afkTimerFrame.elapsed = 0
+    afkTimerFrame:Show()
+
+    PoweredAuction_SubmitQuery("", 0)
 end
 
 function PoweredAuction_ScanNextItem()
@@ -129,8 +179,13 @@ function PoweredAuction_WaitAndQuery(itemName, page)
     if not canQuery then
         scanState.queryRetries = scanState.queryRetries + 1
         if scanState.queryRetries > PA_QUERY_MAX_RETRIES then
-            PoweredAuction_PrintError("Could not query AH for \"" .. itemName .. "\". Skipping.")
-            PoweredAuction_AdvanceItem()
+            if scanState.scanMode == "full" then
+                PoweredAuction_PrintError("Could not query AH. Full scan cancelled.")
+                PoweredAuction_CancelScan("Full scan cancelled.")
+            else
+                PoweredAuction_PrintError("Could not query AH for \"" .. itemName .. "\". Skipping.")
+                PoweredAuction_AdvanceItem()
+            end
             return
         end
         ScheduleCallback(function()
@@ -168,15 +223,26 @@ function PoweredAuction_ProcessScanResults()
 
     local numBatchAuctions, totalAuctions = GetNumAuctionItems("list")
 
-    PoweredAuction_Print("Query \"" .. scanState.currentItemName .. "\" page " .. scanState.currentPage .. ": " .. numBatchAuctions .. " items in batch, " .. totalAuctions .. " total.")
+    if scanState.scanMode == "full" then
+        PoweredAuction_Print("Full scan page " .. scanState.currentPage .. ": " .. numBatchAuctions .. " items in batch, " .. totalAuctions .. " total.")
+    else
+        PoweredAuction_Print("Query \"" .. scanState.currentItemName .. "\" page " .. scanState.currentPage .. ": " .. numBatchAuctions .. " items in batch, " .. totalAuctions .. " total.")
+    end
 
     if numBatchAuctions == 0 then
-        PoweredAuction_AdvanceItem()
+        if scanState.scanMode == "full" then
+            PoweredAuction_FinishScan()
+        else
+            PoweredAuction_AdvanceItem()
+        end
         return
     end
 
     local totalPages = math.ceil(totalAuctions / 50)
     if totalPages == 0 then totalPages = 1 end
+    if scanState.scanMode == "full" and scanState.totalPages == 0 then
+        scanState.totalPages = totalPages
+    end
 
     for i = 1, numBatchAuctions do
         local name, texture, count, quality, canUse, level, minBid, minIncrement, buyoutPrice,
@@ -204,11 +270,21 @@ function PoweredAuction_ProcessScanResults()
 
     if scanState.currentPage < totalPages - 1 then
         local nextPage = scanState.currentPage + 1
+
+        if scanState.scanMode == "full" then
+            PoweredAuction_SetStatusText("Full scan: page " .. (nextPage + 1) .. "/" .. totalPages ..
+                " (" .. scanState.totalScannedItems .. " records)")
+        end
+
         ScheduleCallback(function()
             PoweredAuction_SubmitQuery(scanState.currentItemName, nextPage)
         end, PA_SCAN_DELAY)
     else
-        PoweredAuction_AdvanceItem()
+        if scanState.scanMode == "full" then
+            PoweredAuction_FinishScan()
+        else
+            PoweredAuction_AdvanceItem()
+        end
     end
 end
 
@@ -224,6 +300,8 @@ function PoweredAuction_FinishScan()
     scanState.isScanning = false
     scanState.waitingForResults = false
 
+    afkTimerFrame:Hide()
+
     PoweredAuction_Print("Scan complete! " .. scanState.totalScannedItems .. " records processed.")
     PoweredAuction_SetStatusText("Scan complete!")
     PoweredAuction_UpdateScanButton()
@@ -236,6 +314,8 @@ function PoweredAuction_CancelScan(reason)
     scanTimerFrame:Hide()
     scanTimerFrame.callback = nil
 
+    afkTimerFrame:Hide()
+
     PoweredAuction_PrintError(reason or "Scan cancelled.")
     PoweredAuction_SetStatusText("Scan cancelled.")
     PoweredAuction_UpdateScanButton()
@@ -243,13 +323,25 @@ end
 
 function PoweredAuction_UpdateScanButton()
     local scanButton = getglobal("PoweredAuctionFrameScanButton")
-    if not scanButton then return end
+    local fullButton = getglobal("PoweredAuctionFrameFullScanButton")
 
     if scanState.isScanning then
-        PoweredAuction_SetButtonText("PoweredAuctionFrameScanButton", "Cancel")
-        scanButton:SetBackdropColor(0.45, 0.15, 0.15, 0.9)
+        if scanButton then
+            PoweredAuction_SetButtonText("PoweredAuctionFrameScanButton", "Cancel")
+            scanButton:SetBackdropColor(0.45, 0.15, 0.15, 0.9)
+        end
+        if fullButton then
+            PoweredAuction_SetButtonText("PoweredAuctionFrameFullScanButton", "Cancel")
+            fullButton:SetBackdropColor(0.45, 0.15, 0.15, 0.9)
+        end
     else
-        PoweredAuction_SetButtonText("PoweredAuctionFrameScanButton", "Scan")
-        scanButton:SetBackdropColor(0.15, 0.35, 0.15, 0.9)
+        if scanButton then
+            PoweredAuction_SetButtonText("PoweredAuctionFrameScanButton", "Scan")
+            scanButton:SetBackdropColor(0.15, 0.35, 0.15, 0.9)
+        end
+        if fullButton then
+            PoweredAuction_SetButtonText("PoweredAuctionFrameFullScanButton", "Full")
+            fullButton:SetBackdropColor(0.15, 0.25, 0.45, 0.9)
+        end
     end
 end

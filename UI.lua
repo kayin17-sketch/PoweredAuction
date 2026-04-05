@@ -31,6 +31,7 @@ function PoweredAuction_OnEvent(event)
         PoweredAuction_CreateDropdown()
         PoweredAuction_SetButtonFont("PoweredAuctionFrameAddButton", "Add")
         PoweredAuction_SetButtonFont("PoweredAuctionFrameScanButton", "Scan")
+        PoweredAuction_SetButtonFont("PoweredAuctionFrameFullScanButton", "Full")
         PoweredAuction_SetButtonFont("PoweredAuctionFrameRemoveButton", "Remove")
         PoweredAuction_Print("Loaded v" .. PoweredAuction.version .. ". Type /pa for help.")
     elseif event == "AUCTION_HOUSE_SHOW" then

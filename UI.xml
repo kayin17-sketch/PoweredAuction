@@ -166,7 +166,7 @@
 
             <EditBox name="$parentItemInput" autoFocus="false" letters="60">
                 <Size>
-                    <AbsDimension x="280" y="24"/>
+                    <AbsDimension x="200" y="24"/>
                 </Size>
                 <Anchors>
                     <Anchor point="TOPLEFT" relativeTo="$parentToolbarBg" relativePoint="TOPLEFT">
@@ -206,7 +206,7 @@
 
             <Button name="$parentAddButton" text="Add">
                 <Size>
-                    <AbsDimension x="70" y="22"/>
+                    <AbsDimension x="55" y="22"/>
                 </Size>
                 <Anchors>
                     <Anchor point="LEFT" relativeTo="$parentItemInput" relativePoint="RIGHT">
@@ -244,7 +244,7 @@
 
             <Button name="$parentScanButton" text="Scan">
                 <Size>
-                    <AbsDimension x="70" y="22"/>
+                    <AbsDimension x="55" y="22"/>
                 </Size>
                 <Anchors>
                     <Anchor point="LEFT" relativeTo="$parentAddButton" relativePoint="RIGHT">
@@ -281,12 +281,51 @@
                 </Scripts>
             </Button>
 
-            <Button name="$parentRemoveButton" text="Remove">
+            <Button name="$parentFullScanButton" text="Full">
                 <Size>
-                    <AbsDimension x="70" y="22"/>
+                    <AbsDimension x="55" y="22"/>
                 </Size>
                 <Anchors>
                     <Anchor point="LEFT" relativeTo="$parentScanButton" relativePoint="RIGHT">
+                        <Offset>
+                            <AbsDimension x="4" y="0"/>
+                        </Offset>
+                    </Anchor>
+                </Anchors>
+                <Backdrop bgFile="Interface\Buttons\WHITE8X8"
+                          edgeFile="Interface\Buttons\WHITE8X8"
+                          tile="true">
+                    <BackgroundInsets>
+                        <AbsInset left="1" right="1" top="1" bottom="1"/>
+                    </BackgroundInsets>
+                    <EdgeSize>
+                        <AbsValue val="1"/>
+                    </EdgeSize>
+                    <Color r="0.15" g="0.25" b="0.45" a="0.9"/>
+                    <BorderColor r="0.2" g="0.35" b="0.55" a="1"/>
+                </Backdrop>
+                <NormalFont style="GameFontNormal"/>
+                <HighlightFont style="GameFontHighlight"/>
+                <Scripts>
+                    <OnClick>
+                        if not PoweredAuction_StartFullScan then return end
+                        PoweredAuction_StartFullScan()
+                    </OnClick>
+                    <OnEnter>
+                        this:SetBackdropColor(0.2, 0.35, 0.55, 0.95)
+                    </OnEnter>
+                    <OnLeave>
+                        this:SetBackdropColor(0.15, 0.25, 0.45, 0.9)
+                    </OnLeave>
+                </Scripts>
+            </Button>
+
+            <Button name="$parentRemoveButton" text="Remove">
+                <Size>
+                    <AbsDimension x="65" y="22"/>
+                </Size>
+                <Anchors>
+                    <Anchor point="LEFT" relativeTo="$parentFullScanButton" relativePoint="RIGHT">
                         <Offset>
                             <AbsDimension x="4" y="0"/>
                         </Offset>

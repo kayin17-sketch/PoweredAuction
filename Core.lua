@@ -36,6 +36,8 @@ function PoweredAuction_SlashCommand(msg)
         PoweredAuction_PrintHelp()
     elseif msg == "scan" then
         PoweredAuction_StartScan()
+    elseif msg == "fullscan" then
+        PoweredAuction_StartFullScan()
     elseif string.sub(msg, 1, 3) == "add" then
         local itemName = PoweredAuction_Trim(string.sub(msg, 5))
         if itemName and itemName ~= "" then
@@ -71,6 +73,7 @@ function PoweredAuction_PrintHelp()
     PoweredAuction_Print("/pa remove <name> - Remove item from watch list")
     PoweredAuction_Print("/pa list - Show current watch list")
     PoweredAuction_Print("/pa scan - Start auction scan (AH must be open)")
+    PoweredAuction_Print("/pa fullscan - Full auction house scan")
     PoweredAuction_Print("/pa clear - Clear all scan history")
     PoweredAuction_Print("/pa help - Show this help")
 end
